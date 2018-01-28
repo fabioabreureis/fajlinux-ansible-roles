@@ -1,0 +1,12 @@
+---
+wildfly_dir: /opt/wildfly
+wildfly_std_conf: /opt/wildfly/wildfly-11.0.0.Final/standalone/conf
+wildfly_std_dir: /opt/wildfly/wildfly-11.0.0.Final/standalone
+wildfly_std_bin: /opt/wildfly/wildfly-11.0.0.Final/bin
+wildfly_adduser: /opt/wildfly/wildfly-11.0.0.Final/bin/add-user.sh
+wildfly_user_create: true
+wildfly_user: wildfly
+wildfly_user_homedir: /opt/wildfly
+
+wildfly_group_create: true
+wildfly_group: wildfly

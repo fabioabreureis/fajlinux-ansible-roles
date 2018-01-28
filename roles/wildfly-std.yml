@@ -1,0 +1,5 @@
+--- 
+- hosts: app-wildlfy-std
+  remote_user: root
+  roles: 
+    - wildfly-std

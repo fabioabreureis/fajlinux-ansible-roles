@@ -1,0 +1,47 @@
+---
+- name: Install Java 1.8 
+  yum: name={{item}} state=present
+  with_items:
+   - java-1.8.0-openjdk
+  
+- name: Create group
+  group: name={{ wildfly_group }}
+
+- name: Create user
+  user:
+    name={{ wildfly_user }}
+    comment='Wildfly App Server'
+    group={{ wildfly_group }}
+    home={{ wildfly_user_homedir }}
+
+- name: Download and Unarchive a Wildfly tar
+  unarchive:
+    src: http://10.0.0.90/repo/jboss/wildfly-11.0.0.Final.tar.gz 
+    dest: "{{ wildfly_dir }}"
+    remote_src: yes
+
+- name: Copying standalone.xml configuration file
+  template: src=standalone.xml dest={{ wildfly_std_conf }}
+
+- name: Copying standalone.sh configuration file
+  copy: src=standalone.sh dest={{ wildfly_std_bin }}
+  
+- name: Change ownership of WildFly installation
+  file: path={{ wildfly_dir }} owner={{ wildfly_user }} group={{ wildfly_group }} state=directory recurse=yes
+  
+- name: Copy the init script
+  copy: src=wildfly dest=/etc/init.d mode=0755  
+
+- name: Adjusts before boot enable 
+  shell: systemctl daemon-reload
+
+- name: Enable WildFly to be started at boot
+  shell: chkconfig wildfly on
+
+- name: Enable WildFly to be started at boot
+  shell: systemctl start wildfly
+
+- name: Set Jboss Admin Password
+  shell: "{{ wildfly_adduser }} jadmin  {{ jadmin  }} --silent"
+
+ 
