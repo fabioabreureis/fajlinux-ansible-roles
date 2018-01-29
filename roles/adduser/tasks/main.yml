@@ -1,0 +1,7 @@
+---
+- name: Create user
+  user:
+    name: linuxuser
+
+- name: Change user password
+  shell: "echo {{ linuxuser }} |  passwd linuxuser --stdin" 

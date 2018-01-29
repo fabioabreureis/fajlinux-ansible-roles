@@ -1,0 +1,5 @@
+--- 
+- hosts: linuxhosts
+  remote_user: root
+  roles: 
+    - adduser
