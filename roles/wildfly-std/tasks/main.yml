@@ -16,7 +16,7 @@
 
 - name: Download and Unarchive a Wildfly tar
   unarchive:
-    src: http://10.0.0.90/repo/jboss/wildfly-11.0.0.Final.tar.gz 
+    src: http://download.jboss.org/wildfly/11.0.0.Final/wildfly-11.0.0.Final.tar.gz 
     dest: "{{ wildfly_dir }}"
     remote_src: yes
 
