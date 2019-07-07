@@ -1,0 +1,68 @@
+---
+- name: add user for Prometheus
+  user:
+    name: prometheus
+    comment: user for prometheus tool 
+    shell: /bin/false
+  tags:
+    - userpromcreate
+
+- name: create /etc/prometheus directory 
+  file:
+    path: /home/prometheus
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: 0644
+  tags:
+    - promdirstruct
+
+- name: create /var/lib/prometheus directory
+  file:
+    path: /var/lib/prometheus
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: 0644
+  tags:
+    - promdirstruct
+
+- name: download and prometheus pkg 
+  unarchive:
+    src: "{{ prometheus_url }}" 
+    dest: /opt/deployprom
+    remote_src: yes
+  tags:
+    - promdownload
+
+- name: Copy binaries 
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 755
+    owner: prometheus 
+    group: prometheus 
+  with_items:
+    - { src: /opt/deployprom/prometheus, dest: '/usr/local/bin/prometheus'} 
+    - { src: /opt/deployprom/promtool, dest: '/usr/local/bin/promtool'} 
+  tags:
+    - promcopy
+
+- name: Copy binaries
+  copy:
+    src: /opt/deployprom
+    dest: /etc/prometheus
+    mode: 644
+    owner: prometheus
+    group: prometheus
+    dir: yes
+  tags:
+    - promcopy
+
+
+- name: Prometheus dir change permissions
+  file:
+    path: /etc/prometheus
+    owner: prometheus
+    group: prometheus
+    mode: '0644'
