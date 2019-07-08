@@ -1,2 +1,5 @@
 [promserver]
 server1
+
+[nodeexporter]
+server1

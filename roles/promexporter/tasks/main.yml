@@ -1,2 +1,65 @@
 ---
-# tasks file for promexporter
+- name: add user for Prometheus
+  user:
+    name: prometheus
+    comment: user for prometheus tool 
+    shell: /bin/false
+  tags:
+    - userpromcreate
+
+- name: create /opt/deployprom directory
+  file:
+    path: /opt/deployprom
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: 0644
+  tags:
+    - promdirstruct
+
+- name: download and prometheus pkg 
+  unarchive:
+    src: "{{ nodeexporter_url }}" 
+    dest: /opt/deployprom
+    remote_src: yes
+  tags:
+    - promdownload
+
+- name: Copy Prometheus files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 755
+    owner: prometheus
+    group: prometheus
+  with_items:
+    - { src: '/opt/deployprom/{{ nodeexporter }}/node_exporter', dest: '/usr/local/bin/node_exporter'}
+  tags:
+    - promcopy
+
+
+- name: Node exporter systemd service
+  template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+    owner: prometheus
+    group: prometheus
+    mode: 0644
+  tags:
+    - promcopy
+
+- name: Systemd reload
+  systemd:
+    daemon_reload: yes
+
+- name: Enable Node exporter service
+  systemd:
+    name: node_exporter
+    enabled: yes
+    masked: no
+
+- name: Start Node exporter  service
+  systemd:
+    state: started
+    name: node_exporter
+
