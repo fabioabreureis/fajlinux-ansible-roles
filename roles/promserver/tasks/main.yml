@@ -7,9 +7,20 @@
   tags:
     - userpromcreate
 
+- name: create /opt/deployprom directory
+  file:
+    path: /opt/deployprom
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: 0644
+  tags:
+    - promdirstruct
+
+
 - name: create /etc/prometheus directory 
   file:
-    path: /home/prometheus
+    path: /etc/prometheus
     state: directory
     owner: prometheus
     group: prometheus
@@ -35,30 +46,55 @@
   tags:
     - promdownload
 
-- name: Copy binaries 
+- name: Copy Prometheus files
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     mode: 755
-    owner: prometheus 
-    group: prometheus 
+    owner: prometheus
+    group: prometheus
   with_items:
-    - { src: /opt/deployprom/prometheus, dest: '/usr/local/bin/prometheus'} 
-    - { src: /opt/deployprom/promtool, dest: '/usr/local/bin/promtool'} 
+    - { src: '/opt/deployprom/{{ promversion }}/prometheus', dest: '/usr/local/bin/prometheus'}
+    - { src: '/opt/deployprom/{{ promversion }}/promtool', dest: '/usr/local/bin/promtool'}
+    - { src: prometheus.yml, dest: '/etc/prometheus'}
   tags:
     - promcopy
 
-- name: Copy binaries
+
+
+- name: Copy Prometheus directories
   copy:
-    src: /opt/deployprom
-    dest: /etc/prometheus
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
     mode: 644
     owner: prometheus
     group: prometheus
-    dir: yes
+  with_items:
+    - { src: '/opt/deployprom/{{ promversion }}/consoles', dest: '/etc/prometheus'}
+    - { src: '/opt/deployprom/{{ promversion }}/console_libraries', dest: '/etc/prometheus'}
   tags:
     - promcopy
 
+
+- name: Prometheus systemd service
+  template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+    owner: prometheus
+    group: prometheus
+    mode: 0644
+  tags:
+    - promcopy
+
+- name: Systemd reload
+  systemd:
+    daemon_reload: yes
+
+- name: Enable prometheus service
+  systemd:
+    name: prometheus 
+    enabled: yes
+    masked: no
 
 - name: Prometheus dir change permissions
   file:
@@ -66,3 +102,8 @@
     owner: prometheus
     group: prometheus
     mode: '0644'
+
+- name: Start Prometheus service
+  systemd:
+    state: started
+    name: prometheus
