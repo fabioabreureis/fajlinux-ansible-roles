@@ -1,0 +1,6 @@
+---
+# vars file for Bind setup
+domain: lab.cephbrasil.com
+nameserver: 192.168.15.199
+network: 192.168.15
+rev_domain: 15.168.192.in-addr.arpa
