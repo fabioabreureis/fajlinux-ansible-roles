@@ -1,1 +1,1 @@
-This is a repository from blog  http://fajlinux.com.br
+This is a repository with my personal playbooks for my own use and https://fajlinux.com posts
