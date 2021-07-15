@@ -1,0 +1,25 @@
+---
+
+ubuntu_pkgs:
+  - gcc
+  - nginx
+  - redis 
+  - python3-setuptools
+  - graphviz
+  - python3-pip
+  - python3-venv
+  - python3-dev
+  - build-essential
+  - libxml2-dev
+  - libxslt1-dev
+  - libffi-dev
+  - libpq-dev 
+  - libssl-dev
+  - zlib1g-dev 
+
+canonical_pgdb_pkg:
+
+
+rhel_pkgs:
+
+

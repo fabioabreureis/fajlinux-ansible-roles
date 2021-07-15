@@ -1,0 +1,9 @@
+---
+- include_tasks: ubuntu.yml
+  when: ansible_facts['distribuition'] == 'Ubuntu'
+  tags: package
+
+- include_tasks: redhat.yml
+  when: ansible_facts['distribuition'] == 'RedHat' or ansible_facts['distribuition'] == 'CentOS'
+  tags: package
+

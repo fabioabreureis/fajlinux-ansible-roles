@@ -1,0 +1,5 @@
+---
+
+- name: Install Postgres packages
+  apt:
+    pkg: "{{ ubuntu_pkgs }}"

@@ -1,0 +1,6 @@
+---
+
+- name: Install Posrgresql Packages {{ rhel_pkgs }}
+  yum:
+    name: "{{ rhel_pkgs }}"
+    state: present 

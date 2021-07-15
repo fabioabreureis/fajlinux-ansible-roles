@@ -1,0 +1,23 @@
+---
+- include_tasks: ubuntu.yml
+  when: ansible_facts['distribution'] == 'Ubuntu'
+  tags: package
+
+- include_tasks: redhat.yml
+  when: ansible_facts['distribution'] == 'RedHat' or ansible_facts['distribution'] == 'CentOS'
+  tags: package
+
+- name: "Find out if PostgreSQL is initialized"
+  stat:
+    path: "/var/lib/pgsql/data/pg_hba.conf"
+  register: postgres_data
+
+- name: "Initialize PostgreSQL"
+  shell: "postgresql-setup initdb"
+  when: not postgres_data.stat.exists
+ 
+- name: "Start and enable services"
+  service: 
+    name: "{{ pg_svc }}"
+    state: started 
+    enabled: yes

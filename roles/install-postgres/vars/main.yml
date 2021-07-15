@@ -1,0 +1,12 @@
+---
+ubuntu_pkgs:
+  - postgresql
+  - postgresql-contrib
+
+rhel_pkgs:
+  - postgresql
+  - postgresql-server 
+  - python3-pip.noarch
+  - python3-psycopg2.x86_64
+
+pg_svc: postgresql
