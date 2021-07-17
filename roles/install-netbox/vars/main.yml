@@ -1,5 +1,4 @@
 ---
-
 ubuntu_pkgs:
   - gcc
   - nginx
@@ -16,10 +15,18 @@ ubuntu_pkgs:
   - libpq-dev 
   - libssl-dev
   - zlib1g-dev 
-
-canonical_pgdb_pkg:
-
+  - redis-server
 
 rhel_pkgs:
-
-
+  - gcc
+  - python36
+  - python36-devel
+  - python3-pip
+  - libxml2-devel
+  - libxslt-devel
+  - libffi-devel
+  - openssl-devel
+  - redhat-rpm-config
+  - python3-dnf
+  - redis 
+  - nginx 

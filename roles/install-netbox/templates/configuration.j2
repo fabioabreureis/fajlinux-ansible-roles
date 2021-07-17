@@ -1,0 +1,161 @@
+{% if allowed_hosts is defined %}
+{% for host in allowed_hosts %}
+ALLOWED_HOSTS = [ {{ host }}{% if not loop.last %}, {% endif %}]
+{% endfor%}
+{% else %}
+ALLOWED_HOSTS = ['*']
+{% endif %}
+
+{% if db_host is defined %}
+DATABASE = {
+    'NAME': '{{ db_name }}',         # Database name
+    'USER': '{{ db_user }}',               # PostgreSQL username
+    'PASSWORD': '{{ db_pass }}',           # PostgreSQL password
+    'HOST': '{{ db_host }}',      # Database server
+    'PORT': '{{ db_port }}',               # Database port (leave blank for default)
+    'CONN_MAX_AGE': 300,      # Max database connection age
+}
+{% endif %}
+
+REDIS = {
+    'tasks': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        # Comment out `HOST` and `PORT` lines and uncomment the following if using Redis Sentinel
+        # 'SENTINELS': [('mysentinel.redis.example.com', 6379)],
+        # 'SENTINEL_SERVICE': 'netbox',
+        'PASSWORD': '',
+        'DATABASE': 0,
+        'SSL': False,
+        # Set this to True to skip TLS certificate verification
+        # This can expose the connection to attacks, be careful
+        # 'INSECURE_SKIP_TLS_VERIFY': False,
+    },
+    'caching': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        # Comment out `HOST` and `PORT` lines and uncomment the following if using Redis Sentinel
+        # 'SENTINELS': [('mysentinel.redis.example.com', 6379)],
+        # 'SENTINEL_SERVICE': 'netbox',
+        'PASSWORD': '',
+        'DATABASE': 1,
+        'SSL': False,
+        # Set this to True to skip TLS certificate verification
+        # This can expose the connection to attacks, be careful
+        # 'INSECURE_SKIP_TLS_VERIFY': False,
+    }
+}
+
+SECRET_KEY = '{{ netbox_secret }}'
+
+ADMINS = [
+    # ['John Doe', 'jdoe@example.com'],
+]
+
+ALLOWED_URL_SCHEMES = (
+    'file', 'ftp', 'ftps', 'http', 'https', 'irc', 'mailto', 'sftp', 'ssh', 'tel', 'telnet', 'tftp', 'vnc', 'xmpp',
+)
+
+BANNER_TOP = ''
+BANNER_BOTTOM = ''
+
+BANNER_LOGIN = ''
+
+BASE_PATH = ''
+
+CACHE_TIMEOUT = 900
+
+CHANGELOG_RETENTION = 90
+
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_WHITELIST = [
+    # 'https://hostname.example.com',
+]
+CORS_ORIGIN_REGEX_WHITELIST = [
+    # r'^(https?://)?(\w+\.)?example\.com$',
+]
+
+DEBUG = False
+
+EMAIL = {
+    'SERVER': 'localhost',
+    'PORT': 25,
+    'USERNAME': '',
+    'PASSWORD': '',
+    'USE_SSL': False,
+    'USE_TLS': False,
+    'TIMEOUT': 10,  # seconds
+    'FROM_EMAIL': '',
+}
+
+ENFORCE_GLOBAL_UNIQUE = False
+
+EXEMPT_VIEW_PERMISSIONS = [
+    # 'dcim.site',
+    # 'dcim.region',
+    # 'ipam.prefix',
+]
+
+
+INTERNAL_IPS = ('127.0.0.1', '::1')
+
+LOGGING = {}
+
+LOGIN_REQUIRED = True
+
+LOGIN_TIMEOUT = None
+
+MAINTENANCE_MODE = False
+
+MAPS_URL = 'https://maps.google.com/?q='
+
+MAX_PAGE_SIZE = 1000
+
+
+
+METRICS_ENABLED = False
+
+NAPALM_USERNAME = ''
+NAPALM_PASSWORD = ''
+
+NAPALM_TIMEOUT = 30
+
+NAPALM_ARGS = {}
+
+PAGINATE_COUNT = 50
+
+PLUGINS = []
+
+
+PREFER_IPV4 = False
+
+RACK_ELEVATION_DEFAULT_UNIT_HEIGHT = 22
+RACK_ELEVATION_DEFAULT_UNIT_WIDTH = 220
+
+REMOTE_AUTH_ENABLED = False
+REMOTE_AUTH_BACKEND = 'netbox.authentication.RemoteUserBackend'
+REMOTE_AUTH_HEADER = 'HTTP_REMOTE_USER'
+REMOTE_AUTH_AUTO_CREATE_USER = True
+REMOTE_AUTH_DEFAULT_GROUPS = []
+REMOTE_AUTH_DEFAULT_PERMISSIONS = {}
+
+RELEASE_CHECK_TIMEOUT = 24 * 3600
+
+RELEASE_CHECK_URL = None
+
+
+RQ_DEFAULT_TIMEOUT = 300
+
+
+SESSION_COOKIE_NAME = 'sessionid'
+
+SESSION_FILE_PATH = None
+
+TIME_ZONE = 'UTC'
+
+DATE_FORMAT = 'N j, Y'
+SHORT_DATE_FORMAT = 'Y-m-d'
+TIME_FORMAT = 'g:i a'
+SHORT_TIME_FORMAT = 'H:i:s'
+DATETIME_FORMAT = 'N j, Y g:i a'
+SHORT_DATETIME_FORMAT = 'Y-m-d H:i'

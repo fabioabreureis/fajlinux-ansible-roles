@@ -1,2 +1,48 @@
 ---
 # defaults file for install-netbox
+
+# netbox system user variables
+netbox_user: netbox
+netbox_group: netbox
+
+# netbox admin user variables
+netbox_superuser_enabled: true
+netbox_superuser_username: admin
+netbox_superuser_password: changeme
+netbox_superuser_email: admin@localhost
+netbox_superuser_create_token: false
+
+# netbox version and url variables
+netbox_url: https://github.com/netbox-community/netbox/archive/refs/tags/v{{ netbox_version }}.tar.gz
+netbox_version: 2.10.9
+
+# path variables
+netbox_install_path: /opt/netbox
+netbox_config_path: "{{ netbox_install_path }}/netbox/netbox"
+netbox_virtualenv_path: "{{ netbox_install_path }}/venv"
+
+netbox_python_binary: python3
+
+# Systemd unit variables (configured by default)
+netbox_setup_systemd: true
+netbox_gunicorn_address: 127.0.0.1
+netbox_gunicorn_port: 8001
+netbox_gunicorn_workers_number: "{{ ansible_processor_vcpus + 1 }}"
+
+# Web frontend variables (not configured by default)
+netbox_setup_web_frontend: false
+
+# Database related variables (password must be changed)
+db: netbox
+db_user: netbox
+db_password: netbox
+db_host: localhost
+
+
+# Configuration
+netbox_config:
+  ALLOWED_HOSTS:
+    - localhost
+    - 127.0.0.1
+  MEDIA_ROOT: "{{ netbox_install_directory }}/netbox/media"
+  REPORTS_ROOT: "{{ netbox_install_directory }}/netbox/reports"

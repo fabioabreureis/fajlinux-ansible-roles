@@ -1,6 +1,7 @@
 ---
 - name: Manage postgresql
   hosts: netbox_db
+  become: true
   vars_files:
     - ./netbox.yml
   tasks:

@@ -1,0 +1,52 @@
+---
+
+- name: Check certificate path
+  stat:
+    path: /etc/ssl/crt/netbox.crt
+  register: netbox_cert
+
+- name: Generate a Self Signed OpenSSL certificate
+  openssl_certificate:
+    path: /etc/ssl/crt/netbox.crt
+    privatekey_path: /etc/ssl/private/netbox.key
+    csr_path: /etc/ssl/csr/netbox.csr
+    provider: selfsigned
+  when: netbox_cert.stat.islnk is not defined and self_ssl is defined 
+
+
+- name: Make sure SSL certificate is installed
+  copy:
+    content: "{{ nginx_ssl_certificate }}"
+    dest: /etc/ssl/crt/netbox.crt
+    owner: root
+    group: root
+    mode: 0644
+  when: "nginx_ssl_certificate is defined"
+  
+
+- name: make sure SSL private key is installed
+  copy:
+    content: "{{ ssl_private_key }}"
+    dest: /etc/ssl/private/netbox.key
+    owner: root
+    group: root
+    mode: 0600
+  no_log: true
+
+
+- name: Copy Nginx configuration file
+  copy:
+    src: "{{ netbox_install_path }}/contrib/nginx.conf"
+    dest: "/etc/nginx/sites-available/netbox"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: 0755
+    remote_src: true
+
+
+- name: Start Nginx Service 
+  service:
+    name: nginx
+    state: starte
+    enabled: true
+    

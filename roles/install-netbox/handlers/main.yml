@@ -1,2 +1,13 @@
 ---
-# handlers file for install-netbox
+
+- name: restart netbox
+  service:
+    name: netbox
+    state: restarted
+    enabled: true
+
+- name: restart netbox rqworker
+  service:
+    name: netbox-rqworker
+    state: restarted
+    enabled: true

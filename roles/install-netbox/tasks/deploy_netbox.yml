@@ -1,0 +1,114 @@
+---
+- name: Stat secret_file path
+  stat:
+    path: " {{ netbox_install_path }}"
+  register: install_path
+
+- name: Download the netbox tar file /opt/netbox_v{{ netbox_version }}.tar.gz
+  get_url:
+    url: "{{ netbox_url }}"
+    dest: /opt/netbox_v{{ netbox_version }}.tar.gz 
+  when: install_path.stat.islnk is not defined
+
+- name: Unarchive the file /opt/netbox_v{{ netbox_version }}.tar.gz
+  unarchive:
+    src: /opt/netbox_v{{ netbox_version }}.tar.gz
+    dest: /opt
+    remote_src: yes
+  when: install_path.stat.islnk is not defined
+
+- name: Create a symbolic link from /opt/netbox_{{ netbox_version }} to /opt/netbox
+  file:
+    src: /opt/netbox-{{ netbox_version }}
+    dest: /opt/netbox
+    state: link
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+
+
+- name: Install virtualenv
+  pip:
+    name: virtualenv
+    executable: pip3 
+
+- name: Install netbox requirements
+  pip:
+    requirements: "{{ netbox_install_path }}/requirements.txt"
+    virtualenv: "{{ netbox_virtualenv_path }}"
+    virtualenv_command: "{{ netbox_python_binary }} -m venv"
+  become: true
+  become_user: "{{ netbox_user }}"
+  
+- name: Allow access to virtualenv
+  file:
+    path: "{{ netbox_virtualenv_path }}"
+    owner: "{{ netbox_user  }}"
+    group: "{{ netbox_group }}"
+    recurse: yes
+
+- name: Stat secret_file path 
+  stat:
+    path: " {{ netbox_install_path }}/secret_file"
+  register: secret_path
+
+- name: Generate secret with openssl command
+  shell: "openssl rand -hex 32 > {{ netbox_install_path }}/secret_file"
+  when: secret_path.stat.islnk is not defined
+  
+- name: Slurp {{ netbox_install_path }}/secret_file
+  slurp:
+    src: "{{ netbox_install_path }}/secret_file"
+  register: slurpfile
+
+- set_fact:
+    netbox_secret: "{{ slurpfile['content'] }}"
+
+- debug:
+    msg: "{{ netbox_secret }}"
+
+
+- name: Copy configuration.py template 
+  template:
+    src: configuration.j2
+    dest: "{{ netbox_install_path }}/netbox/netbox/configuration.py"
+    mode: 0755 
+
+- name: Allow access to netbox dirs
+  file:
+    path: /opt/netbox-{{ netbox_version }}
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    recurse: yes
+
+- name: Collect static files
+  shell:  "{{ netbox_virtualenv_path }}/bin/python3 /opt/netbox/netbox/manage.py collectstatic --no-input"
+  become: yes
+  become_user: "{{ netbox_user }}"
+
+- name: Database migration
+  shell: "{{ netbox_virtualenv_path }}/bin/python3 /opt/netbox/netbox/manage.py migrate"
+  become: yes
+  become_user: "{{ netbox_user }}"
+
+- name: Create superuser
+  shell: echo "from django.contrib.auth.models import User; User.objects.create_superuser('{{ netbox_superuser_username }}', '{{ netbox_superuser_email }}', '{{ netbox_superuser_password }}')" | /home/netbox/venv/bin/python3 /opt/netbox/netbox/manage.py shell
+  become: yes
+  become_user: "{{ netbox_user }}"
+  ignore_errors: yes
+  no_log: True
+
+- name: Copy gunicorn configuration file
+  copy:
+    src: "{{ netbox_install_path }}/contrib/gunicorn.py"
+    dest: "{{ netbox_install_path }}/gunicorn.py"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: 0755
+    remote_src: true
+
+- name: allow access to netbox dir
+  file:
+    path: /opt/netbox-{{ netbox_version }}
+    owner: netbox
+    group: netbox
+    recurse: yes

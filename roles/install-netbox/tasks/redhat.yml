@@ -1,0 +1,12 @@
+---
+
+- name: Install rhel/centos packages
+  yum:
+    name: "{{ rhel_pkgs  }}"
+    state: present
+
+- name: Start redis server
+  service: 
+    name: redis 
+    state: started
+    enabled: true

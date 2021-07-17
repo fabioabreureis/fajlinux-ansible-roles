@@ -1,0 +1,11 @@
+- name: Install Netbox
+  hosts: netbox
+  become: true
+  vars:
+    db_name: netbox
+    db_user: netbox
+    db_pass: netbox123
+    db_host: localhost
+    db_port: 5432
+  roles:
+    - install-netbox

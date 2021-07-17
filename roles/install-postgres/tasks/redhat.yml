@@ -4,3 +4,12 @@
   yum:
     name: "{{ rhel_pkgs }}"
     state: present 
+
+- name: "Find out if PostgreSQL is initialized"
+  stat:
+    path: "/var/lib/pgsql/data/pg_hba.conf"
+  register: postgres_data
+
+- name: "Initialize PostgreSQL"
+  shell: "postgresql-setup initdb"
+  when: not postgres_data.stat.exists
