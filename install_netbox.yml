@@ -2,10 +2,12 @@
   hosts: netbox
   become: true
   vars:
+    netbox_url: netbox.example.com
     db_name: netbox
     db_user: netbox
     db_pass: netbox123
     db_host: localhost
     db_port: 5432
+    nginx_self_ssl: true
   roles:
     - install-netbox

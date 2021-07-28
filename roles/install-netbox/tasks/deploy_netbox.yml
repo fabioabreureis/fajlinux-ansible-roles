@@ -1,12 +1,13 @@
 ---
+
 - name: Stat secret_file path
   stat:
-    path: " {{ netbox_install_path }}"
+    path: "{{ netbox_install_path }}"
   register: install_path
 
 - name: Download the netbox tar file /opt/netbox_v{{ netbox_version }}.tar.gz
   get_url:
-    url: "{{ netbox_url }}"
+    url: "{{ netbox_download_url }}"
     dest: /opt/netbox_v{{ netbox_version }}.tar.gz 
   when: install_path.stat.islnk is not defined
 
@@ -19,7 +20,7 @@
 
 - name: Create a symbolic link from /opt/netbox_{{ netbox_version }} to /opt/netbox
   file:
-    src: /opt/netbox-{{ netbox_version }}
+    src: "/opt/netbox-{{ netbox_version }}"
     dest: /opt/netbox
     state: link
     owner: "{{ netbox_user }}"
@@ -63,9 +64,6 @@
 - set_fact:
     netbox_secret: "{{ slurpfile['content'] }}"
 
-- debug:
-    msg: "{{ netbox_secret }}"
-
 
 - name: Copy configuration.py template 
   template:
@@ -90,12 +88,10 @@
   become: yes
   become_user: "{{ netbox_user }}"
 
-- name: Create superuser
-  shell: echo "from django.contrib.auth.models import User; User.objects.create_superuser('{{ netbox_superuser_username }}', '{{ netbox_superuser_email }}', '{{ netbox_superuser_password }}')" | /home/netbox/venv/bin/python3 /opt/netbox/netbox/manage.py shell
-  become: yes
-  become_user: "{{ netbox_user }}"
-  ignore_errors: yes
-  no_log: True
+
+- name: Create a super user for NetBox
+  shell: "printf '{{ netbox_superuser_script }}' |\
+          {{ netbox_virtualenv_path }}/bin/python {{ netbox_install_path }}/netbox/manage.py shell"
 
 - name: Copy gunicorn configuration file
   copy:
@@ -108,7 +104,7 @@
 
 - name: allow access to netbox dir
   file:
-    path: /opt/netbox-{{ netbox_version }}
+    path: "/opt/netbox-{{ netbox_version }}"
     owner: netbox
     group: netbox
     recurse: yes

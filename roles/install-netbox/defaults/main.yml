@@ -13,7 +13,7 @@ netbox_superuser_email: admin@localhost
 netbox_superuser_create_token: false
 
 # netbox version and url variables
-netbox_url: https://github.com/netbox-community/netbox/archive/refs/tags/v{{ netbox_version }}.tar.gz
+netbox_download_url: https://github.com/netbox-community/netbox/archive/refs/tags/v{{ netbox_version }}.tar.gz
 netbox_version: 2.10.9
 
 # path variables

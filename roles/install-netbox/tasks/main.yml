@@ -57,5 +57,4 @@
     - netbox
     - netbox-rq
 
-
-
+- include_tasks: setup_nginx.yml

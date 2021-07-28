@@ -2,17 +2,29 @@
 
 - name: Check certificate path
   stat:
-    path: /etc/ssl/crt/netbox.crt
+    path:  "/etc/ssl/certs/{{ netbox_url }}.crt"
   register: netbox_cert
+
+- name: Generate an OpenSSL private key.
+  openssl_privatekey:
+    path: "/etc/ssl/certs/{{ netbox_url }}.key"
+  when: netbox_cert.stat.islnk is not defined and nginx_self_ssl is defined
+
+
+- name: Generate an OpenSSL CSR.
+  openssl_csr:
+    path: "/etc/ssl/certs/{{ netbox_url }}.csr"
+    privatekey_path: "/etc/ssl/certs/{{ netbox_url }}.key"
+    common_name: "{{ netbox_url }}"
+  when: netbox_cert.stat.islnk is not defined and nginx_self_ssl is defined
 
 - name: Generate a Self Signed OpenSSL certificate
   openssl_certificate:
-    path: /etc/ssl/crt/netbox.crt
-    privatekey_path: /etc/ssl/private/netbox.key
-    csr_path: /etc/ssl/csr/netbox.csr
+    path: "/etc/ssl/certs/{{ netbox_url }}.crt"
+    privatekey_path: "/etc/ssl/certs/{{ netbox_url }}.key"
+    csr_path: "/etc/ssl/certs/{{ netbox_url }}.csr"
     provider: selfsigned
-  when: netbox_cert.stat.islnk is not defined and self_ssl is defined 
-
+  when: netbox_cert.stat.islnk is not defined and nginx_self_ssl is defined 
 
 - name: Make sure SSL certificate is installed
   copy:
@@ -26,27 +38,28 @@
 
 - name: make sure SSL private key is installed
   copy:
-    content: "{{ ssl_private_key }}"
+    content: "{{ nginx_ssl_private_key }}"
     dest: /etc/ssl/private/netbox.key
     owner: root
     group: root
     mode: 0600
   no_log: true
+  when: "nginx_ssl_private_key is defined"
 
 
-- name: Copy Nginx configuration file
-  copy:
-    src: "{{ netbox_install_path }}/contrib/nginx.conf"
-    dest: "/etc/nginx/sites-available/netbox"
+- name: Copy Nginx configuration template
+  template:
+    src: nginx.conf.j2
+    dest: "/etc/nginx/conf.d/netbox.conf"
     owner: "{{ netbox_user }}"
     group: "{{ netbox_group }}"
     mode: 0755
-    remote_src: true
-
+  notify:
+    - restart nginx
 
 - name: Start Nginx Service 
   service:
     name: nginx
-    state: starte
+    state: started
     enabled: true
-    
+

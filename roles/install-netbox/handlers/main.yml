@@ -11,3 +11,8 @@
     name: netbox-rqworker
     state: restarted
     enabled: true
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted 
