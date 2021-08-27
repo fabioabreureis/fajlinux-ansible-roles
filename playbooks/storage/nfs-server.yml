@@ -1,0 +1,50 @@
+- name: Setup NFS Server
+  hosts: storage
+  become: yes
+  tasks:
+    
+    - name: Group NFS
+      group:
+        name: nfs
+        gid: 36
+        state: present 
+    - name: User NFS
+      user:
+        name: nfs
+        uid: 36
+        state: present
+    - name: Install nfs package
+      yum:
+        name: nfs-utils 
+        state: present 
+
+    - name: Create Path directory 
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0644 
+        owner: nfs
+        group: nfs
+        recurse: true 
+      loop:
+        - "/data"
+        - "/data/nfs"
+        - "/data/nfs/vol1"
+        - "/data/nfs/vol2"
+
+    - name: Mount NFS device
+      mount:
+        path: /data/nfs
+        src: /dev/sdb1
+        fstype: xfs
+        state: present
+
+    - name: Setup Exports file
+      copy:
+        content: "/data/nfs/vol1 192.168.130.0/24(rw,sync) \n/data/nfs/vol2 192.168.130.0/24(rw,sync)"
+        dest: /etc/exports
+    - name: Start and Enable NFS server
+      service: 
+        name: nfs-server
+        state: started 
+        enabled: yes

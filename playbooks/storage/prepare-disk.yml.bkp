@@ -1,0 +1,43 @@
+- hosts: storage
+  become: true
+  vars:
+    lvol:
+      - device: /dev/sdb
+        vg: vg_nfs
+        lv:  lv_nfs1
+      - device: /dev/sdc
+        vg: vg_iscsi
+        lv: lv_data1
+  tasks:
+    - name: Check if {{ item.device }}1 exists 
+      stat:
+        path: "{{ item.device }}1"
+      register: disk
+      loop: "{{ lvol }}"
+    - name: Create a new primary partition on {{ item.device }}
+      parted:
+        device: "{{ item.device }}"
+        number: 1
+        flags: [ lvm ]
+        state: present
+      when: disk.stat.islnk is not defined 
+      loop: "{{ lvol }}"
+
+    - name: Create {{ item.vg }}
+      lvg:
+        vg: "{{ item.vg }}"
+        pvs: "{{ item.device }}"
+      loop: "{{ lvol }}"
+
+    - name: Create iscsi {{ item.lv }}
+      lvol:
+        vg: "{{ item.vg }}"
+        lv: "{{ item.lv }}"
+        size: +100%FREE
+      loop: "{{ lvol }}"
+
+    - name: Create a xfs filesystem on /dev/mapper/{{ item.vg }}/{{ item.lv }}
+      filesystem:
+        fstype: xfs
+        dev: "{{ item.device }}1"
+      loop: "{{ lvol }}"

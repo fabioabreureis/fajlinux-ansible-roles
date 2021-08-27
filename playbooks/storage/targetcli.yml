@@ -1,0 +1,39 @@
+- name: Setup ISCSI storage 
+  hosts: storage
+  become: true
+  vars:
+    blockdev: /dev/sdc1
+    blockname: block1
+    iqn: iqn.2021-08.com.example.com.lab
+    stdredhatiqn: iqn.1994-05.com.redhat:bf84918075a1
+    storage: storage  
+    clients: 
+      - host1
+      - host2
+  tasks:
+    - name: Install targetcli
+      yum:
+        name: targetcli
+        state: present
+      
+    - name: Add disk
+      command: "targetcli '/backstores/block create {{ blockname }} {{ blockdev }}'"
+      tags: disk 
+
+    - name: Create IQN 
+      command: "targetcli '/iscsi create {{ iqn }}:{{ storage }}'"
+      tags: iqnstorage
+ 
+    - name: Create Target access 
+      command: "targetcli '/iscsi/{{ iqn }}:{{ storage }}/tpg1/acls create {{ iqn }}:{{ item }}'"
+      loop: "{{ clients }}"
+      tags: iqnacls
+
+    - name: Create Target access
+      command: "targetcli '/iscsi/{{ iqn }}:{{ storage }}/tpg1/acls create {{ stdredhatiqn }}'"
+      loop: "{{ clients }}"
+      tags: iqnacls
+
+    - name: Create LUN
+      command: "targetcli '/iscsi/{{ iqn }}:{{ storage }}/tpg1/luns create /backstores/block/{{ blockname }}'"
+      tags: luncreate
